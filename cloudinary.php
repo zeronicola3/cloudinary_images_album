@@ -107,7 +107,7 @@ function parseJsonFile(){
 <html>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
     <style>
-        #overlay {
+        #wk-overlay {
             position:absolute; 
             width:100%;
             height:100%;
@@ -116,16 +116,16 @@ function parseJsonFile(){
             z-index:999;
             display:none;
         }
-        #overlay span {
+        #wk-overlay span {
             margin:200px auto 0 auto;
         }
     </style>
 
     <body>
-        <div id="overlay">
+        <div id="wk-overlay">
             <span>Contenuto in overlay.</span><a class="close-overlay">CHIUDI</a>
         </div>
-        <div class="content">
+        <div class="wk-content">
             
         </div>
         <?php
@@ -177,26 +177,60 @@ function parseJsonFile(){
 
 
         <script>
-
+            
+            /** 
+             *  Gets json file content and parse it in JSON
+             *  @param  file (json file 'results.json') 
+             */
             function readJSON(file) {
                 var request = new XMLHttpRequest();
                 request.open('GET', file, false);
                 request.send(null);
                 if (request.status == 200)
-                    return request.responseText;
+                    return JSON.parse(request.responseText);
             };
+
+            var obj = readJSON('./wp-content/themes/wk_matteoragni_dev/results.json');
+
+            getRootFolders(obj);
             
-            var temp = readJSON('./wp-content/themes/wk_matteoragni_dev/results.json');
-
-            var obj = JSON.parse(temp);
-            var a;
-
-            for(var key in obj){
-                $('.content').append('<div class="' + key + '"></div>');
-                $('.content .' + key).html('<h2>' + obj[key].name + '</h2>');
+            /** 
+             *  Gets root folders and call getChildFolders() for single folders content
+             *  @param  obj (json parser object) 
+             */
+            function getRootFolders(obj){
+                // loops each root folders
+                for(var key in obj){
+                    // appends relative root folder content
+                    $('.wk-content').append('<div class="' + key + ' root-folder-container"></div>');
+                    $('.wk-content .' + key).html('<h2>' + obj[key].name + '</h2>');
+                    $('.wk-content .' + key).append('<ul class="folder-list"></ul>');
+                    
+                    // calls it for append subfolders contents
+                    getChildFolders(obj[key].folders, key);
+                }
             }
-
             
+            /** 
+             *  Gets single folders with relative content
+             *  @param  obj (array of folders object)
+             *  @param  parent (string) name of parent root folder 
+             */
+            function getChildFolders(folders, parent){
+                // loops each folders
+                for(var key in folders){
+                    $('.' + parent + ' .folder-list')
+                        // appends list tag item
+                        .append('<li class="folder-item ' + key + '"><a></a></li>')
+                        // find and append, to current list 'a' tag, cover and title
+                        .find('.' + key + ' a')
+                        .append('<img src="' + folders[key].cover + '" alt="' + key + '" />')
+                        .append('<h5>' + folders[key].name + '</h5>')
+                        // attach to current 'a' its identity attributes
+                        .attr('data-parent', parent)
+                        .attr('data-folder', key);
+                }
+            }
 
         </script>
     </body>
