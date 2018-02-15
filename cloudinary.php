@@ -62,6 +62,7 @@ function addSingleImages($folder) {
 
         foreach ($folder_images['resources'] as $key_img => $folder_image) {
             $folder['images'][$folder_image['public_id']] = $folder_image;
+            $folder['images'][$folder_image['public_id']]['cover'] = cloudinary_url($folder_images['resources'][$key_img]['public_id'], array("width"=>150, "height"=>150, "crop"=>"fill"));
         }
         // Aggiungo array images
 
@@ -103,8 +104,11 @@ function parseJsonFile(){
     return $json_data;
 }
 
+
 ?>
 <html>
+    <head>
+    <script src="cloudinary/jszip.min.js" type="text/javascript"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
     <style>
         #wk-overlay {
@@ -120,10 +124,11 @@ function parseJsonFile(){
             margin:200px auto 0 auto;
         }
     </style>
-
+    </head>
     <body>
         <div id="wk-overlay">
-            <span>Contenuto in overlay.</span><a class="close-overlay">CHIUDI</a>
+            <a class="close-overlay">CHIUDI</a>
+            <ul class="image-list"></ul>
         </div>
         <div class="wk-content">
             
@@ -231,6 +236,42 @@ function parseJsonFile(){
                         .attr('data-folder', key);
                 }
             }
+
+            function populateOverlay(folder){
+
+                $('#wk-overlay .image-list').empty();
+                var html_content = '';
+
+                for(var image in folder.images) {
+                    html_content += 
+                        '<li class="image-item">' +
+                            '<img src="' + folder.images[image].cover + '" alt="' + folder.images[image].public_id + '" />' +
+                            '<h5 class="image-title">' + folder.images[image].public_id + '</h5>' +
+                            '<a href="' + folder.images[image].url + '" download>' +
+                                '<div class="image-download"></div>' +
+                            '</a>' +
+                        '</li>';
+                }
+
+                $('#wk-overlay .image-list').append(html_content);
+            
+                $('.image-item img').load(function(evt){
+                    $('#wk-overlay').fadeIn();
+                });
+            }
+
+            $('.folder-item a').on('click', function(){
+                var parent = $(this).attr('data-parent');
+                var folder = $(this).attr('data-folder');
+                
+                populateOverlay(obj[parent].folders[folder]);
+                
+            });
+
+            $('#wk-overlay .close-overlay').on('click', function(){
+                $('#wk-overlay .image-list').empty();
+                $('#wk-overlay').fadeOut();
+            });
 
         </script>
     </body>
