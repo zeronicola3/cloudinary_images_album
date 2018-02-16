@@ -236,12 +236,19 @@ function parseJsonFile(){
                         .attr('data-folder', key);
                 }
             }
+            
 
+            /** 
+             *  Insert content in overlay element and fadein it when images are loaded
+             *  @param  folder (object)
+             */
             function populateOverlay(folder){
 
+                // Empty ul element
                 $('#wk-overlay .image-list').empty();
                 var html_content = '';
-
+                
+                // For each image in that folder creates html content
                 for(var image in folder.images) {
                     html_content += 
                         '<li class="image-item">' +
@@ -252,14 +259,17 @@ function parseJsonFile(){
                             '</a>' +
                         '</li>';
                 }
-
+                
+                // Appends html content to ul element
                 $('#wk-overlay .image-list').append(html_content);
-            
+                
+                // When the images are loaded, fadein overlay
                 $('.image-item img').load(function(evt){
                     $('#wk-overlay').fadeIn();
                 });
             }
-
+            
+            // Listener for click in folder item event
             $('.folder-item a').on('click', function(){
                 var parent = $(this).attr('data-parent');
                 var folder = $(this).attr('data-folder');
@@ -267,7 +277,8 @@ function parseJsonFile(){
                 populateOverlay(obj[parent].folders[folder]);
                 
             });
-
+            
+            // Listener for click in X event
             $('#wk-overlay .close-overlay').on('click', function(){
                 $('#wk-overlay .image-list').empty();
                 $('#wk-overlay').fadeOut();
