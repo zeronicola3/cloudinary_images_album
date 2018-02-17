@@ -108,21 +108,162 @@ function parseJsonFile(){
 ?>
 <html>
     <head>
-    <script src="cloudinary/jszip.min.js" type="text/javascript"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes ">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+
     <style>
+
+        body {
+            width: 90%;
+            margin: 0 auto;
+            position: relative;
+            font-family: sans-serif;
+        }
+        
+        .wk-ap {
+            margin-top: 50px;
+        }
+
+        .wk-ap .root-folder-title {
+            background: #f1f1f1;
+            padding: 10px 15px;
+        }
+        
+        .wk-ap .root-folder-title h2 {
+            margin: 5px 0;
+        }
+
         #wk-overlay {
-            position:absolute; 
+            position: fixed; 
             width:100%;
             height:100%;
+            left: 0;
             background-color:rgba(255,255,255,0.8);
             text-align:center;
             z-index:999;
             display:none;
+            overflow: hidden;
         }
-        #wk-overlay span {
-            margin:200px auto 0 auto;
+
+        ul.folder-list, ul.image-list {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;   
+            flex-wrap: wrap; 
+            align-content: flex-start;
         }
+
+        ul.image-list {
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        li.folder-item {
+            width: calc(50% - 30px);
+            max-width: 150px;
+            padding-left: 15px;
+            padding-right: 15px;
+            cursor: pointer;
+        }
+
+        .folder-item a img {
+            width: 100%;
+        }
+
+        .folder-item a h5 {
+            margin-top: 15px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        li.image-item {
+            width: calc(50% - 30px);
+            max-width: 150px;
+            padding-left: 15px;
+            padding-right: 15px;
+            position: relative;
+        }
+
+        li.image-item .image-container {
+            width: 100%;
+            background-color: #f1f1f1;
+            height: 0;
+            position: relative;
+            padding-top: 100%; /* 1:1 Aspect Ratio */
+        }
+
+        li.image-item .image-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .image-item .image-download {
+            position: absolute;
+            width: calc(100% - 30px);
+            height: 0;
+            padding-top: calc(100% - 30px); /* 1:1 Aspect Ratio */
+            top: 0;
+            background-color: transparent;
+            transition: background-color 0.5s ease;
+        }
+
+        .image-item .image-download a {
+            opacity: 0;
+            width: 80px;
+            height: 80px;
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            transition: opacity 0.5s ease;
+        }
+
+        li.image-item:hover .image-download {
+            background-color: rgba(0,0,0,.6);
+            transition: background-color 0.5s ease;
+        }  
+
+        li.image-item:hover .image-download a {
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }  
+        
+        .image-download a svg {
+                width: 30px;
+                margin-top: 15px;
+                fill: white;
+        }
+
+        .image-download a span {
+            position: relative;
+            width: 100%;
+            left: 0;
+            top: 10px;
+            text-decoration: none;
+            color: white;
+            text-align: center;
+            display: inline-block;
+        }
+        
+
+        .image-item a h5 {
+            max-width: 100%;
+        }
+
+        @media screen and (min-width: 768px) {
+
+        }
+
+        @media screen and (min-width: 1000px) {
+
+        }
+        
+        
     </style>
     </head>
     <body>
@@ -130,7 +271,7 @@ function parseJsonFile(){
             <a class="close-overlay">CHIUDI</a>
             <ul class="image-list"></ul>
         </div>
-        <div class="wk-content">
+        <div class="wk-ap">
             
         </div>
         <?php
@@ -207,9 +348,9 @@ function parseJsonFile(){
                 // loops each root folders
                 for(var key in obj){
                     // appends relative root folder content
-                    $('.wk-content').append('<div class="' + key + ' root-folder-container"></div>');
-                    $('.wk-content .' + key).html('<h2>' + obj[key].name + '</h2>');
-                    $('.wk-content .' + key).append('<ul class="folder-list"></ul>');
+                    $('.wk-ap').append('<div class="' + key + ' root-folder-container"></div>');
+                    $('.wk-ap .' + key).html('<div class="root-folder-title"><h2>' + obj[key].name + '</h2><div>');
+                    $('.wk-ap .' + key).append('<ul class="folder-list"></ul>');
                     
                     // calls it for append subfolders contents
                     getChildFolders(obj[key].folders, key);
@@ -247,16 +388,32 @@ function parseJsonFile(){
                 // Empty ul element
                 $('#wk-overlay .image-list').empty();
                 var html_content = '';
-                
+                var array_path;
+                var image_file_name;
+                var file_weight;
+
                 // For each image in that folder creates html content
                 for(var image in folder.images) {
+
+                    array_path = folder.images[image].public_id.split("/");
+                    image_file_name = (array_path[2] + "." + folder.images[image].format)
+                    if(image_file_name.length > 20){
+                        image_file_name = image_file_name.substring(0, 16) + " ...";
+                    }
+                    
+                    file_weight = niceBytes(folder.images[image].bytes);
+                    
+
                     html_content += 
                         '<li class="image-item">' +
-                            '<img src="' + folder.images[image].cover + '" alt="' + folder.images[image].public_id + '" />' +
-                            '<h5 class="image-title">' + folder.images[image].public_id + '</h5>' +
-                            '<a href="' + folder.images[image].url + '" download>' +
-                                '<div class="image-download"></div>' +
-                            '</a>' +
+                            '<div class="image-container"><img src="' + folder.images[image].cover + '" alt="' + folder.images[image].public_id + '" /></div>' +
+                            '<h5 class="image-title">' + image_file_name + '</h5>' +
+                            '<div class="image-download">' +
+                                '<a href="' + folder.images[image].url + '" download>' +
+                                '<svg viewBox="29 29 142 141"><polygon points="146.7 113.3 146.7 140 53.3 140 53.3 113.3 33.3 113.3 33.3 140 33.3 166.7 53.3 166.7 146.7 166.7 166.7 166.7 166.7 140 166.7 113.3"/><polygon points="120 86 120 33.3 80 33.3 80 86 58.7 86 100 127.3 141.3 86"/></svg>' +
+                                '<span class="image-weight">' + file_weight + '</span>' +
+                                '</a>' + 
+                            '</div>' +
                         '</li>';
                 }
                 
@@ -269,6 +426,19 @@ function parseJsonFile(){
                 });
             }
             
+            
+            const units = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+            function niceBytes(x){
+
+                let l = 0, n = parseInt(x, 10) || 0;
+                while(n >= 1024 && ++l)
+                    n = n/1024;
+
+                return(n.toFixed(n >= 10 || l < 1 ? 0 : 1) + ' ' + units[l]);
+            }
+
+
+
             // Listener for click in folder item event
             $('.folder-item a').on('click', function(){
                 var parent = $(this).attr('data-parent');
