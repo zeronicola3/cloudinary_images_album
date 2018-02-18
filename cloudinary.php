@@ -127,8 +127,9 @@ function parseJsonFile(){
         .wk-ap .root-folder-title {
             background: #f1f1f1;
             padding: 10px 15px;
+            text-align: left;
         }
-        
+
         .wk-ap .root-folder-title h2 {
             margin: 5px 0;
         }
@@ -138,12 +139,33 @@ function parseJsonFile(){
             width:100%;
             height:100%;
             left: 0;
-            background-color:rgba(255,255,255,0.8);
+            top: 0;
+            background-color: white;
             text-align:center;
             z-index:999;
             display:none;
-            overflow: hidden;
+            overflow: auto;
         }
+
+        #wk-overlay .close-overlay {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+        }
+
+        #wk-overlay .close-overlay svg {
+            width: 14px;
+            fill: black;
+        }
+        
+        #wk-overlay .image-folder-title {
+            background: #f1f1f1;
+            padding: 10px 15px;
+            margin: 0;
+            text-align: left;
+            font-size: 14px;
+        }
+
 
         ul.folder-list, ul.image-list {
             list-style-type: none;
@@ -157,7 +179,7 @@ function parseJsonFile(){
 
         ul.image-list {
             width: 90%;
-            margin: 0 auto;
+            margin: 20px auto;
         }
 
         li.folder-item {
@@ -199,19 +221,20 @@ function parseJsonFile(){
             position: absolute;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
         }
 
-        .image-item .image-download {
+        .image-download {
             position: absolute;
-            width: calc(100% - 30px);
-            height: 0;
-            padding-top: calc(100% - 30px); /* 1:1 Aspect Ratio */
+            width: 100%;
+            height: 100%;
             top: 0;
             background-color: transparent;
             transition: background-color 0.5s ease;
         }
 
-        .image-item .image-download a {
+         .image-download a {
             opacity: 0;
             width: 80px;
             height: 80px;
@@ -223,12 +246,12 @@ function parseJsonFile(){
             transition: opacity 0.5s ease;
         }
 
-        li.image-item:hover .image-download {
+        li.image-item:hover  .image-download {
             background-color: rgba(0,0,0,.6);
             transition: background-color 0.5s ease;
         }  
 
-        li.image-item:hover .image-download a {
+        li.image-item:hover  .image-download a {
             opacity: 1;
             transition: opacity 0.5s ease;
         }  
@@ -256,7 +279,40 @@ function parseJsonFile(){
         }
 
         @media screen and (min-width: 768px) {
+            #wk-overlay {
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.5);
+            }
 
+            #wk-overlay .close-overlay {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+            }
+            
+            #wk-overlay .close-overlay svg {
+                width: 20px;
+                fill: white;
+            }   
+
+            #wk-overlay .image-folder-title {
+                width: 70%;
+                margin: 50px auto;
+                background: #f1f1f1;
+                padding: 10px 15px;
+                text-align: left;
+                margin: 100px auto 0;
+                font-size: 24px;
+            }
+
+            ul.image-list {
+                width: 70%;
+                margin: 0px auto;
+                padding: 50px 15px;
+                background-color: white;
+                /* display: inline-block; */
+            }
         }
 
         @media screen and (min-width: 1000px) {
@@ -268,7 +324,16 @@ function parseJsonFile(){
     </head>
     <body>
         <div id="wk-overlay">
-            <a class="close-overlay">CHIUDI</a>
+            <a class="close-overlay">
+                <svg x="0px" y="0px"
+                        viewBox="35 16 130 129" enable-background="new 35 16 130 129" xml:space="preserve">
+                    <g>
+                        <polygon points="153.1,20 99.5,73.8 45.8,20 39,26.9 92.6,80.5 39,134.2 45.8,141 99.5,87.4 153.1,141 160,134.2 106.2,80.5 
+                            160,26.9 	"/>
+                    </g>
+                </svg>
+            </a>
+            <h2 class="image-folder-title"></h2>
             <ul class="image-list"></ul>
         </div>
         <div class="wk-ap">
@@ -391,6 +456,7 @@ function parseJsonFile(){
                 var array_path;
                 var image_file_name;
                 var file_weight;
+                $('#wk-overlay .image-folder-title').html(folder.path);
 
                 // For each image in that folder creates html content
                 for(var image in folder.images) {
@@ -406,14 +472,15 @@ function parseJsonFile(){
 
                     html_content += 
                         '<li class="image-item">' +
-                            '<div class="image-container"><img src="' + folder.images[image].cover + '" alt="' + folder.images[image].public_id + '" /></div>' +
-                            '<h5 class="image-title">' + image_file_name + '</h5>' +
-                            '<div class="image-download">' +
-                                '<a href="' + folder.images[image].url + '" download>' +
-                                '<svg viewBox="29 29 142 141"><polygon points="146.7 113.3 146.7 140 53.3 140 53.3 113.3 33.3 113.3 33.3 140 33.3 166.7 53.3 166.7 146.7 166.7 166.7 166.7 166.7 140 166.7 113.3"/><polygon points="120 86 120 33.3 80 33.3 80 86 58.7 86 100 127.3 141.3 86"/></svg>' +
-                                '<span class="image-weight">' + file_weight + '</span>' +
-                                '</a>' + 
+                            '<div class="image-container"><img src="' + folder.images[image].cover + '" alt="' + folder.images[image].public_id + '" />' +
+                                '<div class="image-download">' +
+                                    '<a href="' + folder.images[image].url + '" download>' +
+                                    '<svg viewBox="29 29 142 141"><polygon points="146.7 113.3 146.7 140 53.3 140 53.3 113.3 33.3 113.3 33.3 140 33.3 166.7 53.3 166.7 146.7 166.7 166.7 166.7 166.7 140 166.7 113.3"/><polygon points="120 86 120 33.3 80 33.3 80 86 58.7 86 100 127.3 141.3 86"/></svg>' +
+                                    '<span class="image-weight">' + file_weight + '</span>' +
+                                    '</a>' + 
+                                '</div>' +
                             '</div>' +
+                            '<h5 class="image-title">' + image_file_name + '</h5>' +
                         '</li>';
                 }
                 
