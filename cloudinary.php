@@ -436,7 +436,7 @@ function parseJsonFile(){
                         // find and append, to current list 'a' tag, cover and title
                         .find('.' + key + ' a')
                         .append('<img src="' + folders[key].cover + '" alt="' + key + '" />')
-                        .append('<h5>' + folders[key].name + '</h5>')
+                        .append('<h5>' + folders[key].name + ' (' + Object.keys(folders[key].images).length + ' img)</h5>')
                         // attach to current 'a' its identity attributes
                         .attr('data-parent', parent)
                         .attr('data-folder', key);
